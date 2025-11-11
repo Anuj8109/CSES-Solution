@@ -5,15 +5,17 @@ import java.util.*;
 public class Subordinates {
     private static final int[] result;
     private static final List<List<Integer>> tree;
+    private static  final int[] outDegree;
     
-    static {
+    static {//Tree builder
         // Initialize static fields using fast input
         FastReader fr = new FastReader();
         int n = fr.nextInt();
         result = new int[n];
+        outDegree = new int[n];
         tree = new ArrayList<>(n);
         
-        // Pre-size all lists
+        // empty-arraylist all lists
         for (int i = 0; i < n; i++) {
             tree.add(new ArrayList<>());
         }
@@ -21,14 +23,16 @@ public class Subordinates {
         // Build tree
         for (int i = 1; i < n; i++) {
             int parent = fr.nextInt() - 1;
-            tree.get(parent).add(i);
+            // tree.get(parent).add(i);
+            tree.get(i).add(parent);
+            outDegree[parent]++;
         }
     }
     
     public static void main(String[] args) {
         // Calculate subordinates using DFS
-        dfs(0);
-        
+        // dfs(0);
+        toplogicalSort();
         // Use StringBuilder for efficient string concatenation
         StringBuilder sb = new StringBuilder(result.length * 2);
         for (int count : result) {
@@ -39,10 +43,28 @@ public class Subordinates {
         System.out.println(sb);
     }
     
-    private static void dfs(int node) {
-        for (int child : tree.get(node)) {
-            dfs(child);
-            result[node] += result[child] + 1;
+    // private static void dfs(int node) {
+    //     for (int child : tree.get(node)) {
+    //         dfs(child);
+    //         result[node] += result[child] + 1;
+    //     }
+    // }
+
+    private static void toplogicalSort(){
+        Queue<Integer> queue = new LinkedList<>();
+        for(int index=0;index<result.length;index++){
+            if(outDegree[index] == 0) queue.add(index);
+        }
+
+        while(!queue.isEmpty()){
+            int curr = queue.poll();
+            for(int parent:tree.get(curr)){
+                outDegree[parent]--;
+                result[parent] += (result[curr] + 1);
+                if(outDegree[parent] == 0){
+                    queue.add(parent);
+                }
+            }
         }
     }
     
